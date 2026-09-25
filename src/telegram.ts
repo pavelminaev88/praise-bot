@@ -90,7 +90,7 @@ export class Telegram {
     text: string,
     opts: { replyTo?: number; keyboard?: InlineKeyboard } = {},
   ) {
-    const params: Record<string, unknown> = { chat_id: chatId, text };
+    const params: Record<string, unknown> = { chat_id: chatId, text, link_preview_options: { is_disabled: true } };
     if (opts.replyTo) {
       params.reply_parameters = { message_id: opts.replyTo, allow_sending_without_reply: true };
     }

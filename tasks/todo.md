@@ -17,7 +17,9 @@
 - [x] /forget, /mydata, /privacy
 
 ## Next
-- [ ] Deploy to Cloudflare, set secrets, open /setup, live test (text, voice, group, buttons)
+- [x] Deploy to Cloudflare, set secrets, open /setup
+- [x] Live test in private chat (2026-09-25): text RU/ES, memory, 🔥 button, /start, /stats, /mydata, /privacy, /forget — all OK, ~2.8 s per reply
+- [ ] Live test: voice message, group chat
 - [ ] Check real latency and CPU time in Cloudflare logs (Free plan: 10 ms CPU per invocation)
 - [ ] **Simplify the prompt** for current models: fewer rules, same behaviour; compare old vs new on 20 real-style messages
 - [ ] Decide on the old n8n bot: switch off or point it to this code
@@ -26,4 +28,4 @@
 
 ## Review (2026-09-25)
 - 33 unit tests, 18 end-to-end tests (local Worker + KV + D1 + Workflows against mock APIs) pass.
-- Not yet verified against real APIs: Telegram, Anthropic (model `claude-sonnet-5`, forced tool call), OpenAI transcription. First live test covers this.
+- Live: Telegram + Anthropic (`claude-sonnet-5`, forced tool call) verified. OpenAI transcription and groups not yet tested live.

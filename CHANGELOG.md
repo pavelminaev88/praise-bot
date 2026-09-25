@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 — 2026-09-25
+- Health check names the missing secret; `/robots.txt`.
+- No link previews in bot messages (the GitHub card under /privacy was noisy).
+
 ## 1.0.0 — 2026-09-25
 First version on Cloudflare, replacing the n8n workflow.
 

@@ -5,3 +5,4 @@
 - Explain storage per version in a table (what / where / when). "D1" and "KV" mean nothing to a non-developer; "counters" vs "memory" does.
 - Verify dashboard paths against docs before giving click-by-click steps; give the deep link (dash.cloudflare.com/?to=/:account/workers-and-pages) instead of menu names that change.
 - `pkill -f "<pattern>"` in a shell whose command line contains the pattern kills the shell itself. Use `[b]racket` patterns.
+- Cloudflare "Create and deploy" screen asks for *build* variables. Runtime secrets go in Worker → Settings → Variables and Secrets, type Secret. Tell the user this before the create screen, not after.
