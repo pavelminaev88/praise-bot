@@ -6,6 +6,7 @@ import type { Env } from "./env";
 import { settings } from "./env";
 import { askClaude } from "./llm";
 import { Metrics } from "./metrics";
+import { usd } from "./pricing";
 import { Telegram } from "./telegram";
 
 const TEST_MESSAGE =
@@ -58,7 +59,8 @@ async function checkClaude(env: Env): Promise<[Check, string]> {
     (sentences < 2 || sentences > 6) && `${sentences} предложений`,
   ].filter(Boolean);
   const ok = problems.length === 0;
-  return [{ ok, text: `Claude (${s.model}): ответ за ${secs(ms)}${ok ? "" : ` — ${problems.join(", ")}`}` }, a.answer];
+  const cost = a.cost !== undefined ? `, стоимость проверки ${usd(a.cost)}` : "";
+  return [{ ok, text: `Claude (${s.model}): ответ за ${secs(ms)}${cost}${ok ? "" : ` — ${problems.join(", ")}`}` }, a.answer];
 }
 
 async function checkOpenAI(env: Env): Promise<Check> {

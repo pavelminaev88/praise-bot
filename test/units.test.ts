@@ -4,7 +4,9 @@ import { buildUserContent, parseAnswer } from "../src/llm";
 import { trimTurns } from "../src/memory";
 import { errorName, UserFacingError } from "../src/reply";
 import type { ReplyJob } from "../src/routing";
-import { pickLang, T } from "../src/texts";
+import { pickLang, plural, T } from "../src/texts";
+import { claudeCost } from "../src/pricing";
+import { Memory } from "../src/memory";
 
 const token = "123456:ABC-test-token";
 
@@ -92,8 +94,53 @@ describe("texts", () => {
     expect(pickLang("de")).toBe("en");
     expect(pickLang(undefined)).toBe("en");
   });
-  it("states the memory lifetime in /privacy", () => {
-    expect(T.privacy(24, true).ru).toContain("24 ч");
-    expect(T.privacy(24, false).ru).toContain("не храню");
+  it("/privacy states memory size and lifetime, links the code", () => {
+    expect(T.privacy(10, 24).ru).toContain("Помню последние 10 твоих сообщений и удаляю их через 24 часа");
+    expect(T.privacy(10, 24).ru).toContain('<a href="https://github.com/pavelminaev88/praise-bot">');
+    expect(T.privacy(0, 24).ru).toContain("Ничего не запоминаю");
+  });
+  it("/start is one short line without a name", () => {
+    expect(T.start.ru).toBe("Привет. За что можешь себя сегодня похвалить?");
+  });
+  it("Russian plurals", () => {
+    expect([1, 2, 5, 11, 21, 22, 25].map((n) => plural(n, "a", "b", "c")).join("")).toBe("abccabc");
+  });
+});
+
+describe("claudeCost", () => {
+  it("prices Sonnet 5 at $2 / $10 per million, cache reads at 10%", () => {
+    expect(claudeCost("claude-sonnet-5", { input_tokens: 1_000_000, output_tokens: 100_000 })).toBeCloseTo(3);
+    expect(claudeCost("claude-sonnet-5", { cache_read_input_tokens: 1_000_000 })).toBeCloseTo(0.2);
+    expect(claudeCost("some-other-model", { input_tokens: 10 })).toBeUndefined();
+  });
+});
+
+describe("memory forgets each message after the TTL", () => {
+  function fakeKV() {
+    const store = new Map<string, { value: string; metadata: unknown }>();
+    return {
+      async getWithMetadata(k: string) {
+        const v = store.get(k);
+        return { value: v ? JSON.parse(v.value) : null, metadata: v?.metadata ?? null };
+      },
+      async put(k: string, value: string, o: { metadata?: unknown }) {
+        store.set(k, { value, metadata: o.metadata });
+      },
+      async delete(k: string) {
+        store.delete(k);
+      },
+    } as unknown as KVNamespace;
+  }
+  it("drops messages older than 24 h, keeps newer ones", async () => {
+    const mem = new Memory(fakeKV(), { botToken: token, maxTurns: 20, ttlHours: 24 });
+    const old = Date.now() - 25 * 3600_000;
+    await mem.append(1, [], [
+      { r: "u", t: "old", ts: old },
+      { r: "a", t: "old answer", ts: old },
+      { r: "u", t: "new" },
+      { r: "a", t: "new answer" },
+    ]);
+    const { turns } = await mem.load(1);
+    expect(turns.map((t) => t.t)).toEqual(["new", "new answer"]);
   });
 });

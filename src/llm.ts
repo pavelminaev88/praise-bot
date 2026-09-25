@@ -3,11 +3,14 @@
 import { SYSTEM_PROMPT } from "./prompt";
 import type { Mode, Turn } from "./memory";
 import type { ReplyJob } from "./routing";
+import { claudeCost, type Usage } from "./pricing";
 
 export interface Answer {
   mode: Mode;
   answer: string;
   language: string;
+  /** USD, when the model price is known. */
+  cost?: number;
 }
 
 const MODES: Mode[] = ["START", "PRAISE", "CLOSING", "SAFETY"];
@@ -78,9 +81,9 @@ export async function askClaude(opts: {
     const detail = await res.text().catch(() => "");
     throw new Error(`Anthropic API ${res.status}: ${detail.slice(0, 300)}`);
   }
-  const data = (await res.json()) as { content?: { type: string; name?: string; input?: Record<string, unknown> }[] };
+  const data = (await res.json()) as { content?: { type: string; name?: string; input?: Record<string, unknown> }[]; usage?: Usage };
   const call = data.content?.find((c) => c.type === "tool_use" && c.name === "reply");
-  return parseAnswer(call?.input);
+  return { ...parseAnswer(call?.input), cost: claudeCost(opts.model, data.usage) };
 }
 
 export function parseAnswer(input: Record<string, unknown> | undefined): Answer {

@@ -10,6 +10,7 @@ import { settings, type Env } from "./env";
 import { route } from "./routing";
 import { Telegram, type BotInfo, type TgUpdate } from "./telegram";
 
+import { PROFILE } from "./profile";
 import { sendReport } from "./selftest";
 
 export { ReplyWorkflow } from "./workflow";
@@ -45,7 +46,26 @@ const COMMANDS = {
   ],
 };
 
-async function setup(env: Env, origin: string): Promise<Response> {
+/** Name, descriptions (default = Russian, plus English and Spanish) and, with ?avatar=1, the profile photo. */
+async function setupProfile(env: Env, tg: Telegram, origin: string, withAvatar: boolean): Promise<string[]> {
+  const done: string[] = [];
+  for (const [lang, p] of Object.entries(PROFILE)) {
+    const language_code = lang === "ru" ? "" : lang;
+    await tg.call("setMyName", { name: p.name, language_code });
+    await tg.call("setMyShortDescription", { short_description: p.short, language_code });
+    await tg.call("setMyDescription", { description: p.description, language_code });
+    done.push(`profile:${lang}`);
+  }
+  if (withAvatar) {
+    const res = await env.ASSETS.fetch(new Request(`${origin}/avatar.jpg`));
+    if (!res.ok) throw new Error(`avatar.jpg not found (${res.status})`);
+    await tg.setProfilePhoto(await res.arrayBuffer());
+    done.push("avatar");
+  }
+  return done;
+}
+
+async function setup(env: Env, origin: string, withAvatar: boolean): Promise<Response> {
   const tg = new Telegram(env.TELEGRAM_BOT_TOKEN, settings(env).telegramApi);
   const url = `${origin}/telegram`;
   await tg.call("setWebhook", {
@@ -60,8 +80,10 @@ async function setup(env: Env, origin: string): Promise<Response> {
     commands: [{ command: "praise", description: "Похвалить (ответь на сообщение)" }],
     scope: { type: "all_group_chats" },
   });
+  // Telegram limits how often a bot may change its name; a failure here must not break the webhook setup.
+  const profile = await setupProfile(env, tg, origin, withAvatar).catch((e) => [`profile failed: ${e instanceof Error ? e.message : e}`]);
   const me = await getBot(env);
-  return Response.json({ ok: true, bot: `@${me.username}`, webhook: url, next: `Open https://t.me/${me.username} and say hi.` });
+  return Response.json({ ok: true, bot: `@${me.username}`, webhook: url, profile, next: `Open https://t.me/${me.username} and say hi.` });
 }
 
 async function handleUpdate(env: Env, update: TgUpdate, ctx: ExecutionContext): Promise<void> {
@@ -122,7 +144,7 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/setup") {
       try {
-        return await setup(env, url.origin);
+        return await setup(env, url.origin, url.searchParams.get("avatar") === "1");
       } catch (e) {
         return Response.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
       }

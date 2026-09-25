@@ -27,7 +27,7 @@ export interface ReplyJob {
   input: Input;
 }
 
-export type Command = "privacy" | "forget" | "mydata" | "stats" | "selftest";
+export type Command = "start" | "privacy" | "forget" | "mydata" | "stats" | "selftest";
 
 export type Action =
   | { kind: "ignore" }
@@ -43,7 +43,7 @@ export function ratingCallbackData(code: "g" | "n" | "b", eventId: string) {
   return `r:${code}:${eventId}`;
 }
 
-const COMMANDS: Record<string, Command | "praise" | "start"> = {
+const COMMANDS: Record<string, Command | "praise"> = {
   start: "start",
   help: "start",
   praise: "praise",
@@ -152,7 +152,7 @@ function routePrivate(m: TgMessage, opts: RouteOptions): Action {
   const cmd = parseCommand(m, opts.bot.username);
   if (cmd && !cmd.foreign) {
     const known = COMMANDS[cmd.name];
-    if (known && known !== "start" && known !== "praise") {
+    if (known && known !== "praise") {
       return { kind: "command", command: known, chatId: m.chat.id, chatKind: "private", userId: from.id, userLang: from.language_code };
     }
   }
@@ -160,8 +160,11 @@ function routePrivate(m: TgMessage, opts: RouteOptions): Action {
   let input: Input | undefined = mediaOf(m);
   if (!input) {
     let text = textOf(m);
-    // "/praise something" → "something"; "/start" stays as is so the model answers in START mode.
-    if (cmd && COMMANDS[cmd.name] === "praise") text = stripEntities(text, [cmd.entity]) || "/start";
+    // "/praise something" → "something"; a bare "/praise" is the same as /start.
+    if (cmd && COMMANDS[cmd.name] === "praise") {
+      text = stripEntities(text, [cmd.entity]);
+      if (!text) return { kind: "command", command: "start", chatId: m.chat.id, chatKind: "private", userId: from.id, userLang: from.language_code };
+    }
     if (!text.trim()) return { kind: "ignore" };
     input = { type: "text", text };
   }
@@ -203,7 +206,7 @@ function routeGroup(m: TgMessage, opts: RouteOptions): Action {
 
   if (cmdForUs) {
     const known = COMMANDS[cmd!.name];
-    if (known && known !== "start" && known !== "praise") {
+    if (known && known !== "praise") {
       return { kind: "command", command: known, chatId: m.chat.id, chatKind: "group", userId: from.id, userLang: from.language_code, replyTo: m.message_id };
     }
   }
@@ -243,7 +246,10 @@ function routeGroup(m: TgMessage, opts: RouteOptions): Action {
     }
   }
 
-  const input: Input = ownMedia ?? { type: "text", text: ownText || "/start" };
+  if (!ownMedia && !ownText && !replyToBot) {
+    return { kind: "command", command: "start", chatId: m.chat.id, chatKind: "group", userId: from.id, userLang: from.language_code, replyTo: m.message_id };
+  }
+  const input: Input = ownMedia ?? { type: "text", text: ownText || "…" };
   return withVoiceLimit(
     {
       kind: "reply",

@@ -108,6 +108,8 @@ export async function handleReply(env: Env, job: ReplyJob): Promise<void> {
           mode: answer.mode,
           lang: answer.language,
           latencyMs: Date.now() - started,
+          costUsd: answer.cost,
+          voiceSec: job.input.type === "voice" ? job.input.duration : undefined,
           userId: job.userId,
         },
         eventId,

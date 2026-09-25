@@ -23,6 +23,8 @@ export interface Env {
   KV: KVNamespace;
   DB: D1Database;
   REPLY_WORKFLOW: Workflow;
+  /** Static files from ./public (the avatar). */
+  ASSETS: Fetcher;
 }
 
 function int(value: string | undefined, fallback: number): number {

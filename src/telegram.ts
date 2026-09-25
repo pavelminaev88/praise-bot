@@ -88,9 +88,10 @@ export class Telegram {
   sendMessage(
     chatId: number,
     text: string,
-    opts: { replyTo?: number; keyboard?: InlineKeyboard } = {},
+    opts: { replyTo?: number; keyboard?: InlineKeyboard; html?: boolean } = {},
   ) {
     const params: Record<string, unknown> = { chat_id: chatId, text, link_preview_options: { is_disabled: true } };
+    if (opts.html) params.parse_mode = "HTML";
     if (opts.replyTo) {
       params.reply_parameters = { message_id: opts.replyTo, allow_sending_without_reply: true };
     }
@@ -112,6 +113,16 @@ export class Telegram {
       message_id: messageId,
       reply_markup: { inline_keyboard: [] },
     });
+  }
+
+  /** Sets the bot's own profile photo (JPEG). */
+  async setProfilePhoto(jpeg: ArrayBuffer): Promise<void> {
+    const form = new FormData();
+    form.append("photo", JSON.stringify({ type: "static", photo: "attach://avatar" }));
+    form.append("avatar", new Blob([jpeg], { type: "image/jpeg" }), "avatar.jpg");
+    const res = await fetch(`${this.apiBase}/bot${this.token}/setMyProfilePhoto`, { method: "POST", body: form, signal: AbortSignal.timeout(30_000) });
+    const data = (await res.json().catch(() => ({}))) as { ok?: boolean; description?: string };
+    if (!data.ok) throw new Error(`Telegram setMyProfilePhoto failed: ${res.status} ${data.description ?? ""}`.trim());
   }
 
   /** Downloads a file by file_id. Bots can download files up to 20 MB. */

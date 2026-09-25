@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 — 2026-09-25
+- `/start`: one fixed line — «Привет. За что можешь себя сегодня похвалить?» (no model call, no name).
+- `/privacy`: four short lines, GitHub as a hidden link. `/mydata` lists only your messages; `/forget`: «Готово, разговор забыт.»
+- Memory: each message is forgotten 24 h after it was written (not 24 h after the last one).
+- `/setup` sets the bot name, descriptions (RU default, EN, ES) and, with `?avatar=1`, the profile photo.
+- New avatar: a ladle with a red heart, in the style of @cherpai_iznutri.
+- Weekly check moved to Saturday 07:00 UTC; the report shows the check's own cost and the week's Claude cost and voice minutes.
+
 ## 1.1.0 — 2026-09-25
 - Weekly health check (Mondays 07:00 UTC): Telegram webhook, KV, D1, OpenAI key, one real Claude praise checked for mode, language, no "!" or emoji, 2–6 sentences. Report + 7-day stats to the owner in Telegram. `/selftest` runs it on demand. Cost: one Claude call (<1 cent).
 - Avatar drafts in `assets/`.

@@ -31,9 +31,12 @@
     }
   ],
 
-  // Weekly health check: Mondays 07:00 UTC (09:00 in Barcelona in summer, 08:00 in winter).
+  // Weekly health check: Saturdays 07:00 UTC (09:00 in Barcelona in summer, 08:00 in winter).
   // The report goes to ADMIN_TELEGRAM_ID. Costs one Claude call (under 1 cent).
-  "triggers": { "crons": ["0 7 * * 1"] },
+  // Static files (the bot avatar used by /setup?avatar=1).
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+
+  "triggers": { "crons": ["0 7 * * 6"] },
 
   "observability": { "enabled": true }
 }

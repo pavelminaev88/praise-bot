@@ -21,12 +21,12 @@
 - [x] Live test in private chat (2026-09-25): text RU/ES, memory, 🔥 button, /start, /stats, /mydata, /privacy, /forget — all OK, ~2.8 s per reply
 - [ ] Live test: voice message, group chat
 - [x] Weekly health check + /selftest (e2e: 20/20)
-- [ ] Pick avatar, set bot profile texts in BotFather
-- [ ] New /start, /privacy, /mydata, /forget texts (drafts under discussion)
+- [x] Avatar (ladle + heart), profile texts via /setup
+- [x] New /start, /privacy, /mydata, /forget texts
 - [ ] Check real latency and CPU time in Cloudflare logs (Free plan: 10 ms CPU per invocation)
 - [ ] **Simplify the prompt** for current models: fewer rules, same behaviour; compare old vs new on 20 real-style messages
 - [ ] Decide on the old n8n bot: switch off or point it to this code
-- [ ] Group privacy mode: confirm @mentions arrive with Group Privacy off
+- [ ] Group privacy: turn it back ON in BotFather (mentions still arrive) and confirm in a group
 - [ ] Move KidTales off n8n with the same stack
 
 ## Review (2026-09-25)

@@ -30,9 +30,9 @@ describe("private chat", () => {
     expect(j.replyTo).toBeUndefined();
   });
 
-  it("passes /start to the model", () => {
-    const j = job(route(msg({ text: "/start", entities: [command("/start")] }), opts));
-    expect(j.input).toEqual({ type: "text", text: "/start" });
+  it("answers /start and a bare /praise with the fixed greeting", () => {
+    expect(route(msg({ text: "/start", entities: [command("/start")] }), opts)).toMatchObject({ kind: "command", command: "start" });
+    expect(route(msg({ text: "/praise", entities: [command("/praise")] }), opts)).toMatchObject({ kind: "command", command: "start" });
   });
 
   it("handles service commands without the model", () => {
@@ -105,7 +105,7 @@ describe("group chat", () => {
   });
 
   it("answers /praise@thisbot and ignores /praise@otherbot", () => {
-    expect(route(msg({ text: "/praise@PohvalaChatBot", entities: [command("/praise@PohvalaChatBot")] }, "supergroup"), opts).kind).toBe("reply");
+    expect(route(msg({ text: "/praise@PohvalaChatBot", entities: [command("/praise@PohvalaChatBot")] }, "supergroup"), opts)).toMatchObject({ kind: "command", command: "start" });
     expect(route(msg({ text: "/praise@OtherBot", entities: [command("/praise@OtherBot")] }, "supergroup"), opts).kind).toBe("ignore");
   });
 
@@ -117,8 +117,7 @@ describe("group chat", () => {
 
   it("treats a bare tag as a start", () => {
     const text = "@PohvalaChatBot";
-    const j = job(route(msg({ text, entities: [mention(text, text)] }, "supergroup"), opts));
-    expect(j.input).toEqual({ type: "text", text: "/start" });
+    expect(route(msg({ text, entities: [mention(text, text)] }, "supergroup"), opts)).toMatchObject({ kind: "command", command: "start", chatKind: "group" });
   });
 
   it("routes /forget@thisbot as a command", () => {

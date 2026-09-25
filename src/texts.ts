@@ -9,9 +9,6 @@ export function pickLang(code?: string): Lang {
   return "en";
 }
 
-function hours(ms: number) {
-  return Math.max(1, Math.round(ms / 3600_000));
-}
 
 export const T = {
   listening: {
@@ -40,9 +37,14 @@ export const T = {
     en: "I could not hear any words. Try again or send it as text.",
   },
   forgot: {
-    ru: "Готово. Я забыл наш разговор.",
-    es: "Hecho. He olvidado nuestra conversación.",
-    en: "Done. I have forgotten our conversation.",
+    ru: "Готово, разговор забыт.",
+    es: "Hecho, conversación olvidada.",
+    en: "Done, conversation forgotten.",
+  },
+  start: {
+    ru: "Привет. За что можешь себя сегодня похвалить?",
+    es: "Hola. ¿Por qué puedes felicitarte hoy?",
+    en: "Hi. What can you praise yourself for today?",
   },
   privateOnly: {
     ru: "Эта команда работает в личных сообщениях со мной.",
@@ -50,59 +52,53 @@ export const T = {
     en: "This command works in a private chat with me.",
   },
   thanks: { ru: "Спасибо", es: "Gracias", en: "Thanks" },
-  privacy: (ttlHours: number, memoryOn: boolean) => ({
+  /** HTML (sent with parse_mode HTML). */
+  privacy: (userMessages: number, ttlHours: number) => ({
     ru: [
-      "Что я храню:",
-      memoryOn
-        ? `— В личке помню последние сообщения нашего разговора ${ttlHours} ч после последнего сообщения, потом они удаляются автоматически. /forget — удалить сразу, /mydata — посмотреть.`
-        : "— Сообщения я не храню.",
-      "— В группах ничего не запоминаю. Сообщения, где меня не позвали, сразу отбрасываю.",
-      "— Анонимные счётчики: дата, тип ответа, язык, оценка 🔥😐👎. Без текстов и без ID.",
-      "",
-      "Кто ещё видит сообщения:",
-      "— Текст обрабатывает модель Claude (Anthropic), голосовые расшифровывает OpenAI. По их условиям для API данные не используются для обучения и удаляются в течение 30 дней.",
-      "— Сам Telegram хранит переписку как обычный чат.",
-      "",
-      "Код открыт, можно проверить: https://github.com/pavelminaev88/praise-bot",
+      userMessages
+        ? `Помню последние ${userMessages} ${plural(userMessages, "твоё сообщение", "твоих сообщения", "твоих сообщений")} и удаляю их через ${ttlHours} ${plural(ttlHours, "час", "часа", "часов")}, без привязки к аккаунту.`
+        : "Ничего не запоминаю.",
+      "/mydata — посмотреть, /forget — стереть память.",
+      "Работаю на ИИ-моделях Claude и OpenAI.",
+      `<a href="${REPO}">Открытый код бота на GitHub</a>`,
     ].join("\n"),
     es: [
-      "Qué guardo:",
-      memoryOn
-        ? `— En privado recuerdo los últimos mensajes de nuestra conversación durante ${ttlHours} h desde el último mensaje; después se borran solos. /forget — borrar ya, /mydata — ver.`
-        : "— No guardo mensajes.",
-      "— En grupos no recuerdo nada. Los mensajes en los que no me llaman se descartan al momento.",
-      "— Contadores anónimos: fecha, tipo de respuesta, idioma, valoración 🔥😐👎. Sin textos ni IDs.",
-      "",
-      "Quién más ve los mensajes:",
-      "— El texto lo procesa el modelo Claude (Anthropic) y la voz la transcribe OpenAI. Según sus condiciones de API, los datos no se usan para entrenar y se borran en 30 días.",
-      "— Telegram guarda el chat como cualquier otro.",
-      "",
-      "El código es abierto: https://github.com/pavelminaev88/praise-bot",
+      userMessages
+        ? `Recuerdo tus últimos ${userMessages} mensajes y los borro a las ${ttlHours} h, sin vincularlos a tu cuenta.`
+        : "No guardo nada.",
+      "/mydata — ver, /forget — borrar la memoria.",
+      "Funciono con los modelos de IA Claude y OpenAI.",
+      `<a href="${REPO}">Código abierto del bot en GitHub</a>`,
     ].join("\n"),
     en: [
-      "What I store:",
-      memoryOn
-        ? `— In private chat I remember the latest messages of our conversation for ${ttlHours} h after the last message, then they are deleted automatically. /forget deletes them now, /mydata shows them.`
-        : "— I do not store messages.",
-      "— In groups I remember nothing. Messages that do not call me are dropped right away.",
-      "— Anonymous counters: date, reply type, language, 🔥😐👎 rating. No texts, no IDs.",
-      "",
-      "Who else sees messages:",
-      "— Text is processed by Claude (Anthropic), voice is transcribed by OpenAI. Under their API terms data is not used for training and is deleted within 30 days.",
-      "— Telegram itself keeps the chat like any other chat.",
-      "",
-      "The code is open: https://github.com/pavelminaev88/praise-bot",
+      userMessages
+        ? `I remember your last ${userMessages} messages and delete them after ${ttlHours} h, not linked to your account.`
+        : "I do not remember anything.",
+      "/mydata — see it, /forget — erase memory.",
+      "Powered by Claude and OpenAI AI models.",
+      `<a href="${REPO}">Open-source code on GitHub</a>`,
     ].join("\n"),
   }),
-  myData: (count: number, expiresInMs: number | undefined, preview: string) => ({
+  myData: (count: number, ttlHours: number, list: string) => ({
     ru: count
-      ? `Сейчас я помню ${count} сообщ. из нашего разговора. Они удалятся примерно через ${hours(expiresInMs ?? 0)} ч.\n/forget — удалить сейчас.\n\n${preview}`
+      ? `Помню ${count} ${plural(count, "твоё сообщение", "твоих сообщения", "твоих сообщений")}. Каждое удаляю через ${ttlHours} ${plural(ttlHours, "час", "часа", "часов")}. /forget — стереть сейчас.\n\n${list}`
       : "О тебе у меня ничего не сохранено.",
     es: count
-      ? `Ahora recuerdo ${count} mensajes de nuestra conversación. Se borrarán en unas ${hours(expiresInMs ?? 0)} h.\n/forget — borrar ya.\n\n${preview}`
+      ? `Recuerdo ${count} mensajes tuyos. Cada uno se borra a las ${ttlHours} h. /forget — borrar ya.\n\n${list}`
       : "No tengo nada guardado sobre ti.",
     en: count
-      ? `I currently remember ${count} messages from our conversation. They will be deleted in about ${hours(expiresInMs ?? 0)} h.\n/forget deletes them now.\n\n${preview}`
+      ? `I remember ${count} of your messages. Each is deleted after ${ttlHours} h. /forget — erase now.\n\n${list}`
       : "I have nothing stored about you.",
   }),
 };
+
+const REPO = "https://github.com/pavelminaev88/praise-bot";
+
+/** Russian plural: 1 сообщение, 2 сообщения, 5 сообщений. */
+export function plural(n: number, one: string, few: string, many: string): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+}

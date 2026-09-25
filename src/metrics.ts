@@ -3,6 +3,8 @@
 // for ~36 hours and is then gone, so it can count people within a day but not follow anyone.
 
 import { dailyUserHash, randomId } from "./crypto";
+import { usd } from "./pricing";
+import { plural } from "./texts";
 
 let schemaReady = false;
 
@@ -22,6 +24,9 @@ const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS idx_events_ts ON events(ts)`,
 ];
 
+// Columns added after the first release. ALTER fails if the column exists, which is fine.
+const MIGRATIONS = [`ALTER TABLE events ADD COLUMN cost_usd REAL`, `ALTER TABLE events ADD COLUMN voice_sec INTEGER`];
+
 export interface EventRow {
   chat: "private" | "group";
   input: "text" | "voice";
@@ -29,6 +34,10 @@ export interface EventRow {
   lang?: string;
   latencyMs?: number;
   error?: string;
+  /** Claude cost of this reply, USD. */
+  costUsd?: number;
+  /** Length of the voice message, seconds. */
+  voiceSec?: number;
   userId: number;
 }
 
@@ -41,6 +50,7 @@ export class Metrics {
   private async ensureSchema() {
     if (schemaReady) return;
     await this.db.batch(SCHEMA.map((s) => this.db.prepare(s)));
+    for (const m of MIGRATIONS) await this.db.prepare(m).run().catch(() => {});
     schemaReady = true;
   }
 
@@ -60,10 +70,10 @@ export class Metrics {
     const userDay = await dailyUserHash(await this.dailySalt(), row.userId);
     await this.db
       .prepare(
-        `INSERT INTO events (id, ts, chat, input, mode, lang, latency_ms, error, user_day)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO events (id, ts, chat, input, mode, lang, latency_ms, error, user_day, cost_usd, voice_sec)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .bind(id, new Date().toISOString(), row.chat, row.input, row.mode ?? null, row.lang ?? null, row.latencyMs ?? null, row.error ?? null, userDay)
+      .bind(id, new Date().toISOString(), row.chat, row.input, row.mode ?? null, row.lang ?? null, row.latencyMs ?? null, row.error ?? null, userDay, row.costUsd ?? null, row.voiceSec ?? null)
       .run();
     return id;
   }
@@ -111,7 +121,8 @@ export class Metrics {
                       COUNT(DISTINCT substr(ts, 1, 10)) AS days,
                       SUM(mode = 'PRAISE') AS praise, SUM(input = 'voice') AS voice, SUM(chat = 'group') AS grp,
                       SUM(rating = 'good') AS good, SUM(rating = 'neutral') AS neutral, SUM(rating = 'bad') AS bad,
-                      SUM(error IS NOT NULL) AS errors, CAST(AVG(latency_ms) AS INTEGER) AS avg_ms
+                      SUM(error IS NOT NULL) AS errors, CAST(AVG(latency_ms) AS INTEGER) AS avg_ms,
+                      SUM(cost_usd) AS cost, SUM(voice_sec) AS voice_sec
                FROM events WHERE ts >= ? AND ts < ?`;
     const [cur, prev] = await Promise.all([
       this.db.prepare(q).bind(iso(7), iso(0)).first<Record<string, number>>(),
@@ -123,10 +134,11 @@ export class Metrics {
     const fire = rated ? ` (🔥 ${Math.round((n(c.good) / rated) * 100)}%)` : "";
     const perDay = n(c.days) ? Math.round((n(c.person_days) / n(c.days)) * 10) / 10 : 0;
     return [
-      `За 7 дней: ${n(c.replies)} ответов (неделей раньше ${n(prev?.replies)}), в среднем ${perDay} чел. в день`,
+      `За 7 дней: ${n(c.replies)} ${plural(n(c.replies), "ответ", "ответа", "ответов")} (неделей раньше ${n(prev?.replies)}), в среднем ${perDay} чел. в день`,
       `Похвал ${n(c.praise)}, голосовых ${n(c.voice)}, в группах ${n(c.grp)}`,
       `Оценки: 🔥${n(c.good)} 😐${n(c.neutral)} 👎${n(c.bad)}${fire}`,
       `Ошибок ${n(c.errors)}, среднее время ответа ${(n(c.avg_ms) / 1000).toFixed(1).replace(".", ",")} с`,
+      `Расходы: Claude ${usd(n(c.cost))}, голосовые ${Math.round(n(c.voice_sec) / 60)} мин`,
     ].join("\n");
   }
 }

@@ -11,6 +11,8 @@ export interface Turn {
   r: "u" | "a";
   t: string;
   m?: Mode;
+  /** When the message was written, ms since epoch. Older than MEMORY_TTL_HOURS → forgotten. */
+  ts?: number;
 }
 
 interface Stored {
@@ -45,12 +47,19 @@ export class Memory {
   async load(chatId: number): Promise<{ turns: Turn[]; expiresAt?: number }> {
     if (!this.enabled) return { turns: [] };
     const { value, metadata } = await this.kv.getWithMetadata<Stored, Meta>(await this.key(chatId), "json");
-    return { turns: value?.turns ?? [], expiresAt: metadata?.exp };
+    return { turns: this.fresh(value?.turns ?? []), expiresAt: metadata?.exp };
+  }
+
+  /** Each message is forgotten MEMORY_TTL_HOURS after it was written. */
+  private fresh(turns: Turn[]): Turn[] {
+    const cutoff = Date.now() - this.cfg.ttlHours * 3600_000;
+    return trimTurns(turns.filter((t) => (t.ts ?? Date.now()) > cutoff), this.cfg.maxTurns);
   }
 
   async append(chatId: number, previous: Turn[], added: Turn[]): Promise<void> {
     if (!this.enabled) return;
-    const turns = trimTurns([...previous, ...added], this.cfg.maxTurns);
+    const now = Date.now();
+    const turns = this.fresh([...previous, ...added.map((t) => ({ ...t, ts: t.ts ?? now }))]);
     const ttl = this.cfg.ttlHours * 3600;
     await this.kv.put(await this.key(chatId), JSON.stringify({ turns } satisfies Stored), {
       expirationTtl: ttl,

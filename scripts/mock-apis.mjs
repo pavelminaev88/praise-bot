@@ -22,7 +22,8 @@ export function startMock(port = 8788) {
     let m = url.pathname.match(/^\/bot([^/]+)\/(\w+)$/);
     if (m) {
       const method = m[2];
-      const body = raw.length ? JSON.parse(raw.toString()) : {};
+      const isJson = (req.headers["content-type"] || "").includes("json");
+      const body = raw.length && isJson ? JSON.parse(raw.toString()) : { multipart: raw.length, hasJpeg: raw.includes("image/jpeg") };
       calls.push({ api: "telegram", method, body });
       if (method === "getMe") return json({ ok: true, result: { id: 999, is_bot: true, first_name: "Похвала", username: "PohvalaChatBot" } });
       if (method === "sendMessage") return json({ ok: true, result: { message_id: ++messageId, date: 0, chat: { id: body.chat_id, type: "private" }, text: body.text } });
@@ -47,7 +48,7 @@ export function startMock(port = 8788) {
       }
       const text = last.split("\n").at(-1);
       if (text.includes("пробежку")) {
-        return json({ content: [{ type: "tool_use", name: "reply", input: { MODE: "PRAISE", ANSWER: "Слышу, что было непросто. Ты всё равно вышел. Это настоящая забота о себе.", LANGUAGE: "ru" } }] });
+        return json({ content: [{ type: "tool_use", name: "reply", input: { MODE: "PRAISE", ANSWER: "Слышу, что было непросто. Ты всё равно вышел. Это настоящая забота о себе.", LANGUAGE: "ru" } }], usage: { input_tokens: 2400, output_tokens: 120 } });
       }
       const mode = text === "/start" ? "START" : text === "спасибо" ? "CLOSING" : "PRAISE";
       return json({
@@ -56,6 +57,7 @@ export function startMock(port = 8788) {
         role: "assistant",
         content: [{ type: "tool_use", id: "tu_1", name: "reply", input: { MODE: mode, ANSWER: `Ответ на: ${text}`, LANGUAGE: "RU" } }],
         stop_reason: "tool_use",
+        usage: { input_tokens: 400, cache_read_input_tokens: 2000, output_tokens: 150 },
       });
     }
 

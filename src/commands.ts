@@ -18,11 +18,22 @@ export async function runCommand(env: Env, a: CommandAction): Promise<void> {
   const tg = new Telegram(env.TELEGRAM_BOT_TOKEN, s.telegramApi);
   const lang = pickLang(a.userLang);
   const memory = new Memory(env.KV, { botToken: env.TELEGRAM_BOT_TOKEN, maxTurns: s.memoryMessages, ttlHours: s.memoryTtlHours });
-  const reply = (text: string) => tg.sendMessage(a.chatId, text, { replyTo: a.replyTo });
+  const reply = (text: string, html = false) => tg.sendMessage(a.chatId, text, { replyTo: a.replyTo, html });
 
   switch (a.command) {
+    case "start": {
+      const text = T.start[lang];
+      await reply(text);
+      // Remember the greeting, so the next answer knows the question it follows.
+      if (a.chatKind === "private" && memory.enabled) {
+        const { turns } = await memory.load(a.chatId);
+        await memory.append(a.chatId, turns, [{ r: "u", t: "/start" }, { r: "a", t: text, m: "START" }]).catch(() => {});
+      }
+      return;
+    }
+
     case "privacy":
-      await reply(T.privacy(s.memoryTtlHours, memory.enabled)[lang]);
+      await reply(T.privacy(Math.floor(s.memoryMessages / 2), s.memoryTtlHours)[lang], true);
       return;
 
     case "forget":
@@ -33,9 +44,9 @@ export async function runCommand(env: Env, a: CommandAction): Promise<void> {
 
     case "mydata": {
       if (a.chatKind !== "private") return void (await reply(T.privateOnly[lang]));
-      const { turns, expiresAt } = await memory.load(a.chatId);
-      const preview = turns.map((t) => `${t.r === "u" ? "—" : "↳"} ${t.t}`).join("\n").slice(0, 3500);
-      await reply(T.myData(turns.length, expiresAt ? expiresAt - Date.now() : undefined, preview)[lang]);
+      const mine = (await memory.load(a.chatId)).turns.filter((t) => t.r === "u" && t.t !== "/start");
+      const list = mine.map((t) => `— ${t.t}`).join("\n").slice(0, 3500);
+      await reply(T.myData(mine.length, s.memoryTtlHours, list)[lang]);
       return;
     }
 

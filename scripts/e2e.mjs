@@ -93,6 +93,33 @@ try {
     assert.equal(hook.body.url, `${WORKER}/telegram`);
   });
 
+  await test("/setup?avatar=1 sets profile texts and photo", async () => {
+    const body = await (await fetch(`${WORKER}/setup?avatar=1`)).json();
+    assert.deepEqual(body.profile, ["profile:ru", "profile:en", "profile:es"].concat("avatar"), JSON.stringify(body));
+    const name = mock.calls.find((c) => c.method === "setMyName" && c.body.language_code === "");
+    assert.equal(name.body.name, "Похвала");
+    const photo = mock.calls.find((c) => c.method === "setMyProfilePhoto");
+    assert.ok(photo?.body.hasJpeg, "photo uploaded as JPEG");
+  });
+
+  await test("/start sends the fixed greeting, no model call", async () => {
+    await send(message({ text: "/start", entities: [{ type: "bot_command", offset: 0, length: 6 }] }));
+    const s = await waitFor(() => sent()[0], 10000, "greeting");
+    assert.equal(s.body.text, "Привет. За что можешь себя сегодня похвалить?");
+    assert.equal(claude().length, 0);
+    mock.reset();
+    await send(message({ text: "/forget", entities: [{ type: "bot_command", offset: 0, length: 7 }] }));
+    await waitFor(() => sent()[0], 10000, "forget");
+  });
+
+  await test("/privacy is short, HTML, with a hidden GitHub link", async () => {
+    await send(message({ text: "/privacy", entities: [{ type: "bot_command", offset: 0, length: 8 }] }));
+    const s = await waitFor(() => sent()[0], 10000, "privacy");
+    assert.equal(s.body.parse_mode, "HTML");
+    assert.match(s.body.text, /^Помню последние 10 твоих сообщений и удаляю их через 24 часа/);
+    assert.ok(s.body.text.split("\n").length <= 4);
+  });
+
   await test("private text → praise with rating buttons", async () => {
     await send(message({ text: "Я сегодня сходил в спортзал" }));
     const s = await waitFor(() => sent()[0], 20000, "reply");
@@ -116,7 +143,8 @@ try {
   await test("/mydata shows what is remembered", async () => {
     await send(message({ text: "/mydata", entities: [{ type: "bot_command", offset: 0, length: 7 }] }));
     const s = await waitFor(() => sent()[0], 10000, "mydata");
-    assert.match(s.body.text, /помню 4 сообщ/);
+    assert.match(s.body.text, /Помню 2 твоих сообщения\. Каждое удаляю через 24 часа/);
+    assert.match(s.body.text, /— Я сегодня сходил в спортзал/);
     assert.equal(claude().length, 0);
   });
 
@@ -157,11 +185,13 @@ try {
     const s = await waitFor(() => sent()[0], 15000, "selftest report");
     assert.match(s.body.text, /проверка: 4\/4/, s.body.text);
     assert.match(s.body.text, /Тестовый ответ: «Слышу/);
-    assert.match(s.body.text, /За 7 дней: \d+ ответов/);
+    assert.match(s.body.text, /За 7 дней: \d+ ответ/);
+    assert.match(s.body.text, /Расходы: Claude \$0\.\d+, голосовые \d+ мин/);
+    assert.match(s.body.text, /стоимость проверки \$0\.\d+/);
   });
 
   await test("weekly cron sends the report", async () => {
-    await fetch(`${WORKER}/cdn-cgi/handler/scheduled?cron=0+7+*+*+1`);
+    await fetch(`${WORKER}/cdn-cgi/handler/scheduled?cron=0+7+*+*+6`);
     const s = await waitFor(() => sent()[0], 15000, "cron report");
     assert.equal(s.body.chat_id, 1);
     assert.match(s.body.text, /проверка: 4\/4/);

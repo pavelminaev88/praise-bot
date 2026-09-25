@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+<defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+  <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0b1d5c" flood-opacity="0.35"/></filter></defs>
+<rect width="640" height="640" fill="#487AFF"/>
+<!-- white sticker outline -->
+<g filter="url(#sh)">
+  <path d="M415,344 L530,158" stroke="#fff" stroke-width="92" stroke-linecap="round"/>
+  <path d="M107,350 A165,150 0 0 0 437,350 A165,38 0 0 0 107,350 Z" fill="#fff" stroke="#fff" stroke-width="44" stroke-linejoin="round"/>
+  <g transform="translate(272,312) scale(1.55)"><path d="M0,-35 C-10,-62 -60,-62 -60,-22 C-60,12 -22,34 0,58 C22,34 60,12 60,-22 C60,-62 10,-62 0,-35 Z" fill="#fff" stroke="#fff" stroke-width="26" stroke-linejoin="round"/></g>
+</g>
+<!-- handle -->
+<path d="M415,344 L530,158" stroke="#1B1440" stroke-width="50" stroke-linecap="round"/>
+<path d="M415,344 L530,158" stroke="#FFC83D" stroke-width="36" stroke-linecap="round"/>
+<path d="M445,300 L512,178" stroke="#fff3c4" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+<!-- back of the bowl (inside) -->
+<ellipse cx="272" cy="350" rx="165" ry="38" fill="#E0A21A" stroke="#1B1440" stroke-width="8"/>
+<!-- heart sitting in the bowl -->
+<g transform="translate(272,312) scale(1.55)"><path d="M0,-35 C-10,-62 -60,-62 -60,-22 C-60,12 -22,34 0,58 C22,34 60,12 60,-22 C60,-62 10,-62 0,-35 Z" fill="#FD0100" stroke="#1B1440" stroke-width="5.5" stroke-linejoin="round"/><path d="M-38,-30 C-36,-42 -24,-46 -16,-40" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<!-- front of the bowl covers the bottom of the heart -->
+<path d="M107,350 A165,150 0 0 0 437,350 A165,38 0 0 1 107,350 Z" fill="#FFC83D" stroke="#1B1440" stroke-width="8" stroke-linejoin="round"/>
+<path d="M137,395 C167,455 212,485 262,488" stroke="#fff3c4" stroke-width="13" fill="none" stroke-linecap="round"/>
+</svg>
