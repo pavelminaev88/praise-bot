@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0 — 2026-09-25
+- Weekly health check (Mondays 07:00 UTC): Telegram webhook, KV, D1, OpenAI key, one real Claude praise checked for mode, language, no "!" or emoji, 2–6 sentences. Report + 7-day stats to the owner in Telegram. `/selftest` runs it on demand. Cost: one Claude call (<1 cent).
+- Avatar drafts in `assets/`.
+
 ## 1.0.1 — 2026-09-25
 - Health check names the missing secret; `/robots.txt`.
 - No link previews in bot messages (the GitHub card under /privacy was noisy).

@@ -8,6 +8,7 @@ Live bot: [@PohvalaChatBot](https://t.me/PohvalaChatBot) · Russian setup guide:
 - **Groups:** reacts only when tagged (`@PohvalaChatBot`), replied to, or on `/praise`. Tag it in a reply to someone's message to praise that person.
 - **Memory:** last 20 messages of a private chat for 24 h, then deleted automatically. `/forget`, `/mydata`, `/privacy`.
 - **Feedback:** 🔥😐👎 under each praise, counted anonymously. `/stats` for the owner.
+- **Weekly check:** every Monday the bot tests itself (Telegram, storage, one real Claude reply) and sends the owner a report with weekly stats. `/selftest` runs it now.
 - **Free hosting:** Cloudflare Workers Free plan. You pay only for the AI APIs.
 
 ## What it stores

@@ -10,6 +10,8 @@ import { settings, type Env } from "./env";
 import { route } from "./routing";
 import { Telegram, type BotInfo, type TgUpdate } from "./telegram";
 
+import { sendReport } from "./selftest";
+
 export { ReplyWorkflow } from "./workflow";
 
 let botInfo: BotInfo | undefined;
@@ -131,5 +133,10 @@ export default {
       return new Response(`praise-bot is running. ${optional}. After the first deploy, open /setup once.`);
     }
     return new Response("Not found", { status: 404 });
+  },
+
+  /** Weekly health check (see "triggers" in wrangler.jsonc). Sends a report to ADMIN_TELEGRAM_ID. */
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(sendReport(env).catch((e) => console.error("weekly check failed:", e instanceof Error ? e.message.slice(0, 200) : "error")));
   },
 } satisfies ExportedHandler<Env>;

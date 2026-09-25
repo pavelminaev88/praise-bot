@@ -27,7 +27,7 @@ export interface ReplyJob {
   input: Input;
 }
 
-export type Command = "privacy" | "forget" | "mydata" | "stats";
+export type Command = "privacy" | "forget" | "mydata" | "stats" | "selftest";
 
 export type Action =
   | { kind: "ignore" }
@@ -51,6 +51,7 @@ const COMMANDS: Record<string, Command | "praise" | "start"> = {
   forget: "forget",
   mydata: "mydata",
   stats: "stats",
+  selftest: "selftest",
 };
 
 interface ParsedCommand {

@@ -100,4 +100,33 @@ export class Metrics {
     );
     return [`Статистика за ${days} дн.:`, ...lines].join("\n");
   }
+
+  /** Last 7 days vs the 7 days before. People are counted per day (hashes change daily), so we show a daily average. */
+  async weekSummary(): Promise<string> {
+    await this.ensureSchema();
+    const now = Date.now();
+    const iso = (d: number) => new Date(now - d * 86400_000).toISOString();
+    const q = `SELECT COUNT(*) AS replies,
+                      COUNT(DISTINCT user_day) AS person_days,
+                      COUNT(DISTINCT substr(ts, 1, 10)) AS days,
+                      SUM(mode = 'PRAISE') AS praise, SUM(input = 'voice') AS voice, SUM(chat = 'group') AS grp,
+                      SUM(rating = 'good') AS good, SUM(rating = 'neutral') AS neutral, SUM(rating = 'bad') AS bad,
+                      SUM(error IS NOT NULL) AS errors, CAST(AVG(latency_ms) AS INTEGER) AS avg_ms
+               FROM events WHERE ts >= ? AND ts < ?`;
+    const [cur, prev] = await Promise.all([
+      this.db.prepare(q).bind(iso(7), iso(0)).first<Record<string, number>>(),
+      this.db.prepare(q).bind(iso(14), iso(7)).first<Record<string, number>>(),
+    ]);
+    const n = (v: unknown) => Number(v ?? 0);
+    const c = cur ?? {};
+    const rated = n(c.good) + n(c.neutral) + n(c.bad);
+    const fire = rated ? ` (🔥 ${Math.round((n(c.good) / rated) * 100)}%)` : "";
+    const perDay = n(c.days) ? Math.round((n(c.person_days) / n(c.days)) * 10) / 10 : 0;
+    return [
+      `За 7 дней: ${n(c.replies)} ответов (неделей раньше ${n(prev?.replies)}), в среднем ${perDay} чел. в день`,
+      `Похвал ${n(c.praise)}, голосовых ${n(c.voice)}, в группах ${n(c.grp)}`,
+      `Оценки: 🔥${n(c.good)} 😐${n(c.neutral)} 👎${n(c.bad)}${fire}`,
+      `Ошибок ${n(c.errors)}, среднее время ответа ${(n(c.avg_ms) / 1000).toFixed(1).replace(".", ",")} с`,
+    ].join("\n");
+  }
 }

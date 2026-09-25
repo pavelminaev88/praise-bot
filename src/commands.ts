@@ -6,6 +6,7 @@ import { Memory } from "./memory";
 import { Metrics } from "./metrics";
 import type { Action } from "./routing";
 import { Telegram } from "./telegram";
+import { buildReport } from "./selftest";
 import { pickLang, T } from "./texts";
 
 type CommandAction = Extract<Action, { kind: "command" }>;
@@ -42,6 +43,11 @@ export async function runCommand(env: Env, a: CommandAction): Promise<void> {
       // Only for the owner. Everyone else gets no answer, so the command stays invisible.
       if (a.chatKind !== "private" || !s.adminId || a.userId !== s.adminId) return;
       await reply(await new Metrics(env.DB, env.KV).report(7));
+      return;
+
+    case "selftest":
+      if (a.chatKind !== "private" || !s.adminId || a.userId !== s.adminId) return;
+      await reply(await buildReport(env));
       return;
   }
 }

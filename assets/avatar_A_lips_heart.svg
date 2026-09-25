@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+<defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+  <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0b1d5c" flood-opacity="0.35"/></filter></defs>
+<rect width="640" height="640" fill="#487AFF"/>
+
+<g transform="translate(0,-18)">
+  <g filter="url(#sh)"><path d="M100,285 C140,225 215,185 280,200 C300,205 310,214 320,220 C330,214 340,205 360,200 C425,185 500,225 540,285 C475,265 400,258 320,266 C240,258 165,265 100,285 Z" fill="#fff" stroke="#fff" stroke-width="44" stroke-linejoin="round"/><path d="M100,285 C165,266 240,262 320,270 C400,262 475,266 540,285 C510,368 425,408 320,408 C215,408 130,368 100,285 Z" fill="#fff" stroke="#fff" stroke-width="44" stroke-linejoin="round"/><path d="M222,300 C250,292 285,290 320,292 C355,290 390,292 418,300 C432,390 410,488 320,500 C230,488 208,390 222,300 Z" fill="#fff" stroke="#fff" stroke-width="44" stroke-linejoin="round"/></g>
+  <path d="M100,285 C165,266 240,262 320,270 C400,262 475,266 540,285 C510,368 425,408 320,408 C215,408 130,368 100,285 Z" fill="#EA3B36" stroke="#1B1440" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M140,284 C200,274 260,272 320,276 C380,272 440,274 500,284 C470,335 400,356 320,356 C240,356 170,335 140,284 Z" fill="#3a0610"/>
+  <path d="M165,285 C225,277 272,276 320,279 C368,276 415,277 475,285 L462,306 C415,299 368,297 320,299 C272,297 225,299 178,306 Z" fill="#fff"/>
+  <path d="M222,300 C250,292 285,290 320,292 C355,290 390,292 418,300 C432,390 410,488 320,500 C230,488 208,390 222,300 Z" fill="#F7849A" stroke="#1B1440" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M320,320 C318,360 322,395 320,425" stroke="#D9546F" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M100,285 C140,225 215,185 280,200 C300,205 310,214 320,220 C330,214 340,205 360,200 C425,185 500,225 540,285 C475,265 400,258 320,266 C240,258 165,265 100,285 Z" fill="#EA3B36" stroke="#1B1440" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M170,250 C200,228 240,218 270,222" stroke="#ff9c96" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M420,345 C450,335 480,318 500,300" stroke="#ff9c96" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <g transform="translate(320,438) scale(0.78)">
+    <path d="M0,-35 C-10,-62 -60,-62 -60,-22 C-60,12 -22,34 0,58 C22,34 60,12 60,-22 C60,-62 10,-62 0,-35 Z" fill="#FD0100" stroke="#1B1440" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M-38,-30 C-36,-42 -24,-46 -16,-40" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round"/>
+  </g>
+</g>
+
+</svg>

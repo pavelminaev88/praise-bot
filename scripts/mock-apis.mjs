@@ -26,6 +26,7 @@ export function startMock(port = 8788) {
       calls.push({ api: "telegram", method, body });
       if (method === "getMe") return json({ ok: true, result: { id: 999, is_bot: true, first_name: "Похвала", username: "PohvalaChatBot" } });
       if (method === "sendMessage") return json({ ok: true, result: { message_id: ++messageId, date: 0, chat: { id: body.chat_id, type: "private" }, text: body.text } });
+      if (method === "getWebhookInfo") return json({ ok: true, result: { url: "http://127.0.0.1:8787/telegram", pending_update_count: 0 } });
       if (method === "getFile") return json({ ok: true, result: { file_id: body.file_id, file_path: "voice/file_1.oga" } });
       return json({ ok: true, result: true });
     }
@@ -45,6 +46,9 @@ export function startMock(port = 8788) {
         return json({ type: "error", error: { type: "overloaded_error", message: "Overloaded" } }, 529);
       }
       const text = last.split("\n").at(-1);
+      if (text.includes("пробежку")) {
+        return json({ content: [{ type: "tool_use", name: "reply", input: { MODE: "PRAISE", ANSWER: "Слышу, что было непросто. Ты всё равно вышел. Это настоящая забота о себе.", LANGUAGE: "ru" } }] });
+      }
       const mode = text === "/start" ? "START" : text === "спасибо" ? "CLOSING" : "PRAISE";
       return json({
         id: "msg_1",
@@ -54,6 +58,8 @@ export function startMock(port = 8788) {
         stop_reason: "tool_use",
       });
     }
+
+    if (url.pathname === "/v1/models") return json({ data: [] });
 
     // OpenAI transcription
     if (url.pathname === "/v1/audio/transcriptions") {

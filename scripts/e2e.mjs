@@ -30,7 +30,7 @@ rmSync(".wrangler/state", { recursive: true, force: true });
 
 const mock = await startMock(8788);
 const env = { ...process.env, NO_PROXY: "127.0.0.1,localhost", no_proxy: "127.0.0.1,localhost" };
-const dev = spawn("npx", ["wrangler", "dev", "--port", "8787", "--ip", "127.0.0.1", "--local"], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
+const dev = spawn("npx", ["wrangler", "dev", "--port", "8787", "--ip", "127.0.0.1", "--local", "--test-scheduled"], { env, stdio: ["ignore", "pipe", "pipe"], detached: true });
 let devLog = "";
 dev.stdout.on("data", (d) => (devLog += d));
 dev.stderr.on("data", (d) => (devLog += d));
@@ -150,6 +150,21 @@ try {
     await send(message({ text: "/stats", entities: [{ type: "bot_command", offset: 0, length: 6 }] }, { id: 2, type: "private" }, boris));
     await sleep(1500);
     assert.equal(sent().length, 0);
+  });
+
+  await test("/selftest sends a health report to the admin", async () => {
+    await send(message({ text: "/selftest", entities: [{ type: "bot_command", offset: 0, length: 9 }] }));
+    const s = await waitFor(() => sent()[0], 15000, "selftest report");
+    assert.match(s.body.text, /проверка: 4\/4/, s.body.text);
+    assert.match(s.body.text, /Тестовый ответ: «Слышу/);
+    assert.match(s.body.text, /За 7 дней: \d+ ответов/);
+  });
+
+  await test("weekly cron sends the report", async () => {
+    await fetch(`${WORKER}/cdn-cgi/handler/scheduled?cron=0+7+*+*+1`);
+    const s = await waitFor(() => sent()[0], 15000, "cron report");
+    assert.equal(s.body.chat_id, 1);
+    assert.match(s.body.text, /проверка: 4\/4/);
   });
 
   await test("voice message is transcribed and praised", async () => {
