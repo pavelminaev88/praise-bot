@@ -98,8 +98,11 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (!env.TELEGRAM_BOT_TOKEN || !env.ANTHROPIC_API_KEY) {
-      return new Response("Missing secrets: set TELEGRAM_BOT_TOKEN and ANTHROPIC_API_KEY in Settings → Variables and Secrets.", { status: 500 });
+    if (url.pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /\n");
+
+    const missing = (["TELEGRAM_BOT_TOKEN", "ANTHROPIC_API_KEY"] as const).filter((k) => !env[k]);
+    if (missing.length) {
+      return new Response(`Missing secrets: ${missing.join(", ")}. Add them in Settings → Variables and Secrets.`, { status: 500 });
     }
 
     if (request.method === "POST" && url.pathname === "/telegram") {
@@ -123,7 +126,10 @@ export default {
       }
     }
 
-    if (url.pathname === "/") return new Response("praise-bot is running. After the first deploy, open /setup once.");
+    if (url.pathname === "/") {
+      const optional = env.OPENAI_API_KEY ? "voice: on" : "voice: off (no OPENAI_API_KEY)";
+      return new Response(`praise-bot is running. ${optional}. After the first deploy, open /setup once.`);
+    }
     return new Response("Not found", { status: 404 });
   },
 } satisfies ExportedHandler<Env>;
