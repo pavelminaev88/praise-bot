@@ -89,10 +89,9 @@ describe("errorName never leaks content", () => {
 describe("texts", () => {
   it("picks a language", () => {
     expect(pickLang("ru")).toBe("ru");
-    expect(pickLang("uk")).toBe("ru");
+    expect(pickLang("en")).toBe("ru");
     expect(pickLang("ca")).toBe("es");
-    expect(pickLang("de")).toBe("en");
-    expect(pickLang(undefined)).toBe("en");
+    expect(pickLang(undefined)).toBe("ru");
   });
   it("/privacy states memory size and lifetime, links the code", () => {
     expect(T.privacy(10, 24).ru).toContain("Помню последние 10 твоих сообщений и удаляю их через 24 часа");

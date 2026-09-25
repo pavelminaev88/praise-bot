@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.2.0 — 2026-09-25
+- Fixed messages and bot profile are Russian by default (Spanish for es/ca clients); many Russian speakers use Telegram in English. Claude's replies still follow the message language.
 - `/start`: one fixed line — «Привет. За что можешь себя сегодня похвалить?» (no model call, no name).
 - `/privacy`: four short lines, GitHub as a hidden link. `/mydata` lists only your messages; `/forget`: «Готово, разговор забыт.»
 - Memory: each message is forgotten 24 h after it was written (not 24 h after the last one).

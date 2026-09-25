@@ -49,6 +49,10 @@ const COMMANDS = {
 /** Name, descriptions (default = Russian, plus English and Spanish) and, with ?avatar=1, the profile photo. */
 async function setupProfile(env: Env, tg: Telegram, origin: string, withAvatar: boolean): Promise<string[]> {
   const done: string[] = [];
+  // Remove an English profile left from earlier versions, so English-language clients see the Russian default.
+  for (const m of ["setMyName", "setMyShortDescription", "setMyDescription"]) {
+    await tg.call(m, { language_code: "en" }).catch(() => {});
+  }
   for (const [lang, p] of Object.entries(PROFILE)) {
     const language_code = lang === "ru" ? "" : lang;
     await tg.call("setMyName", { name: p.name, language_code });

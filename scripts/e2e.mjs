@@ -95,7 +95,7 @@ try {
 
   await test("/setup?avatar=1 sets profile texts and photo", async () => {
     const body = await (await fetch(`${WORKER}/setup?avatar=1`)).json();
-    assert.deepEqual(body.profile, ["profile:ru", "profile:en", "profile:es"].concat("avatar"), JSON.stringify(body));
+    assert.deepEqual(body.profile, ["profile:ru", "profile:es", "avatar"], JSON.stringify(body));
     const name = mock.calls.find((c) => c.method === "setMyName" && c.body.language_code === "");
     assert.equal(name.body.name, "Похвала");
     const photo = mock.calls.find((c) => c.method === "setMyProfilePhoto");

@@ -2,11 +2,15 @@
 
 export type Lang = "ru" | "es" | "en";
 
+/**
+ * Language of the bot's fixed messages. Russian by default: many Russian speakers use Telegram in English,
+ * so language_code "en" says little. Spanish only for Spanish/Catalan/Galician/Basque clients.
+ * (Claude's own replies always follow the language of the message.)
+ */
 export function pickLang(code?: string): Lang {
   const c = (code ?? "").toLowerCase();
-  if (/^(ru|uk|be|kk)/.test(c)) return "ru";
   if (/^(es|ca|gl|eu)/.test(c)) return "es";
-  return "en";
+  return "ru";
 }
 
 
