@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "praise-bot",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+
+  // Keep variables you set in the Cloudflare dashboard on every deploy.
+  "keep_vars": true,
+
+  // Settings. Change them here or in the dashboard (Settings → Variables and Secrets).
+  "vars": {
+    "MODEL": "claude-sonnet-5",
+    "TRANSCRIBE_MODEL": "gpt-4o-mini-transcribe",
+    "MAX_VOICE_SECONDS": "600",
+    "MEMORY_MESSAGES": "20",
+    "MEMORY_TTL_HOURS": "24"
+  },
+
+  // Storage. Cloudflare creates these automatically on the first deploy.
+  // KV   = short-term chat memory (private chats only, auto-deleted after MEMORY_TTL_HOURS).
+  // D1   = anonymous counters (date, mode, language, rating). No texts, no user IDs.
+  "kv_namespaces": [{ "binding": "KV" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "praise-bot" }],
+
+  // Long-running jobs (voice messages can take longer than a normal request allows).
+  "workflows": [
+    {
+      "name": "praise-bot-reply",
+      "binding": "REPLY_WORKFLOW",
+      "class_name": "ReplyWorkflow"
+    }
+  ],
+
+  "observability": { "enabled": true }
+}
