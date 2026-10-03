@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.1 — 2026-10-03
+- `/selftest` shows the Group Privacy state and the last group messages that reached the bot (time, how the bot was addressed, outcome — no text, no IDs; kept 7 days).
+
 ## 1.2.0 — 2026-09-25
 - Fixed messages and bot profile are Russian by default (Spanish for es/ca clients); many Russian speakers use Telegram in English. Claude's replies still follow the message language.
 - `/start`: one fixed line — «Привет. За что можешь себя сегодня похвалить?» (no model call, no name).

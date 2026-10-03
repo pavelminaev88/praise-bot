@@ -19,6 +19,7 @@ Live bot: [@PohvalaChatBot](https://t.me/PohvalaChatBot) · Russian setup guide:
 | Encrypted copy of a message while it is being answered | Cloudflare Workflows | up to 3 days, unreadable without the bot token |
 | Counters: date, mode, language, rating, cost — no text, no IDs | D1 | until you delete them |
 | Group messages | nowhere | — |
+| Last 10 group events addressed to a bot: time, kind (mention / command / reply), outcome — no text, no IDs | Workers KV | 7 days |
 
 Jobs are encrypted before they are queued in Cloudflare Workflows, and logs contain only error types. Message text is processed by Claude (Anthropic) and voice by OpenAI; their API terms say data is not used for training and is deleted within 30 days.
 
@@ -26,7 +27,7 @@ Jobs are encrypted before they are queued in Cloudflare Workflows, and logs cont
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pavelminaev88/praise-bot)
 
-1. Create a bot with [@BotFather](https://t.me/BotFather) and copy its token. For groups: Bot Settings → Group Privacy → Turn off (so it sees @mentions).
+1. Create a bot with [@BotFather](https://t.me/BotFather) and copy its token. Groups: `/selftest` shows the Group Privacy state and the last group messages that reached the bot. If the bot stays silent when tagged, turn Group Privacy off in BotFather, then remove the bot from the group and add it again.
 2. Click the button above (or fork and import the repo in Cloudflare → Workers & Pages → Create application → Import a repository). KV, D1 and the Workflow are created automatically.
 3. In the Worker: Settings → Variables and Secrets → add secrets:
    - `TELEGRAM_BOT_TOKEN` — from BotFather
