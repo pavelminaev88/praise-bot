@@ -6,6 +6,10 @@ export interface TgUser {
   first_name: string;
   username?: string;
   language_code?: string;
+  /** Only in getMe: may the bot be added to groups. */
+  can_join_groups?: boolean;
+  /** Only in getMe: true when Group Privacy is turned off (the bot gets every group message). */
+  can_read_all_group_messages?: boolean;
 }
 
 export interface TgChat {

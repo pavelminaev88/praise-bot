@@ -239,6 +239,19 @@ try {
     assert.match(c.messages[0].content, /\[chat: group\] \[praise for: Boris\] \[asked by: Anna\]/);
   });
 
+  await test("/selftest shows group settings and the last group events, without text", async () => {
+    const text = "@OtherBot привет";
+    await send(message({ text, entities: [{ type: "mention", offset: 0, length: 9 }] }, group));
+    await sleep(1500);
+    mock.reset();
+    await send(message({ text: "/selftest", entities: [{ type: "bot_command", offset: 0, length: 9 }] }));
+    const s = await waitFor(() => sent()[0], 15000, "selftest report");
+    assert.match(s.body.text, /Группы: Group Privacy включён/);
+    assert.match(s.body.text, /упоминание бота → отвечаю/);
+    assert.match(s.body.text, /упоминание другого аккаунта → пропущено/);
+    assert.ok(!s.body.text.includes("квартальный") && !s.body.text.includes("всем привет"));
+  });
+
   await test("duplicate update is answered once", async () => {
     const u = { update_id: 777777, ...message({ text: "Дубль" }) };
     for (let i = 0; i < 2; i++) {

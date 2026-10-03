@@ -10,6 +10,7 @@ import { settings, type Env } from "./env";
 import { route } from "./routing";
 import { Telegram, type BotInfo, type TgUpdate } from "./telegram";
 
+import { traceGroup } from "./diag";
 import { PROFILE } from "./profile";
 import { sendReport } from "./selftest";
 
@@ -97,6 +98,12 @@ async function handleUpdate(env: Env, update: TgUpdate, ctx: ExecutionContext): 
   const bot = needsBot ? await getBot(env) : { id: Number(env.TELEGRAM_BOT_TOKEN.split(":")[0]), username: botInfo?.username ?? "" };
   const action = route(update, { bot, maxVoiceSeconds: s.maxVoiceSeconds });
 
+  // Group messages that look addressed to a bot leave an anonymous trace (time + outcome) for /selftest.
+  if (needsBot && update.message) {
+    console.log("group update:", action.kind);
+    ctx.waitUntil(traceGroup(env.KV, update.message, bot, action.kind).catch(() => {}));
+  }
+
   switch (action.kind) {
     case "ignore":
       return;
@@ -142,6 +149,10 @@ export default {
       } catch (e) {
         // Answer 200 anyway: an error here would make Telegram resend the same update again and again.
         console.error("update failed:", e instanceof Error ? e.message.slice(0, 200) : "error");
+        const m = update.message;
+        if (m && m.chat.type !== "private") {
+          ctx.waitUntil(traceGroup(env.KV, m, botInfo ?? { id: 0, username: "" }, "error").catch(() => {}));
+        }
       }
       return new Response("ok");
     }

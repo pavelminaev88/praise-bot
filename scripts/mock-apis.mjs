@@ -25,7 +25,7 @@ export function startMock(port = 8788) {
       const isJson = (req.headers["content-type"] || "").includes("json");
       const body = raw.length && isJson ? JSON.parse(raw.toString()) : { multipart: raw.length, hasJpeg: raw.includes("image/jpeg") };
       calls.push({ api: "telegram", method, body });
-      if (method === "getMe") return json({ ok: true, result: { id: 999, is_bot: true, first_name: "Похвала", username: "PohvalaChatBot" } });
+      if (method === "getMe") return json({ ok: true, result: { id: 999, is_bot: true, first_name: "Похвала", username: "PohvalaChatBot", can_join_groups: true, can_read_all_group_messages: false } });
       if (method === "sendMessage") return json({ ok: true, result: { message_id: ++messageId, date: 0, chat: { id: body.chat_id, type: "private" }, text: body.text } });
       if (method === "getWebhookInfo") return json({ ok: true, result: { url: "http://127.0.0.1:8787/telegram", pending_update_count: 0 } });
       if (method === "getFile") return json({ ok: true, result: { file_id: body.file_id, file_path: "voice/file_1.oga" } });

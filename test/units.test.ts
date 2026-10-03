@@ -5,6 +5,7 @@ import { trimTurns } from "../src/memory";
 import { errorName, UserFacingError } from "../src/reply";
 import type { ReplyJob } from "../src/routing";
 import { pickLang, plural, T } from "../src/texts";
+import { addressedVia } from "../src/diag";
 import { claudeCost } from "../src/pricing";
 import { Memory } from "../src/memory";
 
@@ -141,5 +142,17 @@ describe("memory forgets each message after the TTL", () => {
     ]);
     const { turns } = await mem.load(1);
     expect(turns.map((t) => t.t)).toEqual(["new", "new answer"]);
+  });
+});
+
+describe("group diagnostics", () => {
+  const bot = { id: 999, username: "PohvalaChatBot" };
+  const base = { message_id: 1, date: 0, chat: { id: -1, type: "supergroup" as const } };
+  it("tells how a group message addresses the bot", () => {
+    expect(addressedVia({ ...base, text: "@pohvalachatbot привет", entities: [{ type: "mention", offset: 0, length: 15 }] }, bot)).toBe("упоминание бота");
+    expect(addressedVia({ ...base, text: "@someone привет", entities: [{ type: "mention", offset: 0, length: 8 }] }, bot)).toBe("упоминание другого аккаунта");
+    expect(addressedVia({ ...base, text: "/praise", entities: [{ type: "bot_command", offset: 0, length: 7 }] }, bot)).toBe("команда");
+    expect(addressedVia({ ...base, text: "спасибо", reply_to_message: { ...base, from: { id: 999, is_bot: true, first_name: "Похвала" } } }, bot)).toBe("ответ боту");
+    expect(addressedVia({ ...base, text: "обычный разговор" }, bot)).toBeUndefined();
   });
 });

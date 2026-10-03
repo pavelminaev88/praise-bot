@@ -4,6 +4,7 @@
 
 import type { Env } from "./env";
 import { settings } from "./env";
+import { recentGroupTraces } from "./diag";
 import { askClaude } from "./llm";
 import { Metrics } from "./metrics";
 import { usd } from "./pricing";
@@ -34,6 +35,25 @@ async function checkTelegram(tg: Telegram): Promise<Check> {
   const recentError = info.last_error_date && info.last_error_date > weekAgo ? ` Последняя ошибка: ${info.last_error_message}` : "";
   const ok = info.pending_update_count < 5 && !recentError;
   return { ok, text: `Telegram: подключён, в очереди ${info.pending_update_count}.${recentError}` };
+}
+
+/** Group settings from BotFather plus the last group messages the bot actually received. */
+async function groupsInfo(env: Env, tg: Telegram): Promise<string> {
+  const me = await tg.getMe();
+  const lines = [
+    !me.can_join_groups
+      ? "Группы: добавление в группы запрещено (BotFather → Allow Groups)"
+      : me.can_read_all_group_messages
+        ? "Группы: Group Privacy выключен — бот получает все сообщения группы"
+        : "Группы: Group Privacy включён — бот получает только команды, упоминания и ответы ему",
+  ];
+  const traces = await recentGroupTraces(env.KV);
+  if (!traces.length) lines.push("За 7 дней из групп не пришло ни одного обращения.");
+  for (const t of traces.slice(-5)) {
+    const when = new Date(t.ts).toLocaleString("ru-RU", { timeZone: "Europe/Madrid", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    lines.push(`${when} — ${t.via} → ${t.outcome}`);
+  }
+  return lines.join("\n");
 }
 
 async function checkStorage(env: Env): Promise<Check> {
@@ -95,11 +115,13 @@ export async function buildReport(env: Env): Promise<string> {
   ]);
   const passed = checks.filter((c) => c.ok).length;
   const stats = await new Metrics(env.DB, env.KV).weekSummary().catch(() => "Статистика: не удалось прочитать");
+  const groups = await groupsInfo(env, tg).catch(() => "Группы: не удалось прочитать настройки");
 
   return [
     `${passed === checks.length ? "🟢" : "🔴"} Похвала — проверка: ${passed}/${checks.length}`,
     ...checks.map((c) => `${c.ok ? "✅" : "❌"} ${c.text}`),
     sample ? `\nТестовый ответ: «${sample}»` : "",
+    `\n${groups}`,
     `\n${stats}`,
   ]
     .filter(Boolean)
