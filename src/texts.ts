@@ -72,7 +72,7 @@ export const T = {
         : "No guardo nada.",
       "/mydata — ver, /forget — borrar la memoria.",
       "Funciono con los modelos de IA Claude y OpenAI.",
-      `<a href="${REPO}">Código abierto del bot en GitHub</a>`,
+      `<a href="${REPO}">Código fuente del bot en GitHub</a>`,
     ].join("\n"),
     en: [
       userMessages
@@ -80,7 +80,7 @@ export const T = {
         : "I do not remember anything.",
       "/mydata — see it, /forget — erase memory.",
       "Powered by Claude and OpenAI AI models.",
-      `<a href="${REPO}">Open-source code on GitHub</a>`,
+      `<a href="${REPO}">Source code on GitHub</a>`,
     ].join("\n"),
   }),
   myData: (count: number, ttlHours: number, list: string) => ({

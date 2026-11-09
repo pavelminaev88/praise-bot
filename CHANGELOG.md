@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2 — 2026-11-09
+- License changed from MIT to PolyForm Noncommercial 1.0.0: free to read, run and change for non-commercial use; commercial use needs the author's permission. Earlier versions stay MIT.
+- `/privacy` (en, es): "source code" instead of "open-source code".
+
 ## 1.2.1 — 2026-10-03
 - `/selftest` shows the Group Privacy state and the last group messages that reached the bot (time, how the bot was addressed, outcome — no text, no IDs; kept 7 days).
 

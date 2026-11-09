@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Telegram bot that gives short, sincere praise. Runs on Cloudflare Workers.",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",

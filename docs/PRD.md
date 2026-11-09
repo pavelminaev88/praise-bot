@@ -19,7 +19,7 @@ The first version ran on n8n Cloud (~€29/month), which is too much for a small
 ## Principles
 - **Store almost nothing.** Private memory in KV with TTL. Anonymous counters in D1 (no texts, no IDs; user hash with a salt that is discarded after ~36 h). Jobs are encrypted before entering Workflows. Logs contain error kinds only.
 - **Free to host.** Cloudflare Workers Free: Workers, KV, D1, Workflows. Only API usage (Anthropic, OpenAI) costs money.
-- **Open source.** Anyone can read the code or deploy their own copy.
+- **Source available.** Anyone can read the code or deploy their own copy for non-commercial use (PolyForm Noncommercial 1.0.0). Commercial use only with the author's permission.
 
 ## Non-goals
 Long-term memory, user profiles, analytics on message content, a web interface.

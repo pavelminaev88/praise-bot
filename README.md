@@ -25,6 +25,8 @@ Jobs are encrypted before they are queued in Cloudflare Workflows, and logs cont
 
 ## Deploy your own
 
+For personal and non-commercial use — see [License](#license).
+
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pavelminaev88/praise-bot)
 
 1. Create a bot with [@BotFather](https://t.me/BotFather) and copy its token. Groups: `/selftest` shows the Group Privacy state and the last group messages that reached the bot. If the bot stays silent when tagged, turn Group Privacy off in BotFather, then remove the bot from the group and add it again.
@@ -72,4 +74,6 @@ npm run typecheck
 
 ## License
 
-MIT
+[PolyForm Noncommercial 1.0.0](LICENSE). You can read the code, run your own copy and change it for personal or other non-commercial use. Commercial use needs permission from the author — open an issue in this repository.
+
+Versions published before 2026-11-09 were MIT.
