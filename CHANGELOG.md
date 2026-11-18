@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 — 2026-11-18
+- Private chats: the reply is "typed out" as a live draft (Bot API `sendMessageDraft`) before the final message. `TYPE_OUT_MS` (default 375, `0` = off). Groups are unchanged: drafts are private-only.
+- Memory is stored encrypted (AES-GCM) in KV; old plain records are read once and rewritten encrypted.
+- Memory expires exactly `MEMORY_TTL_HOURS` after its oldest message (before: after the last one, so a message could stay up to ~2× TTL).
+- `/privacy`: "stored encrypted, under a hash of the chat number" instead of "not linked to your account"; RU link text "Исходный код" instead of "Открытый код".
+
 ## 1.2.2 — 2026-11-09
 - License changed from MIT to PolyForm Noncommercial 1.0.0: free to read, run and change for non-commercial use; commercial use needs the author's permission. Earlier versions stay MIT.
 - `/privacy` (en, es): "source code" instead of "open-source code".

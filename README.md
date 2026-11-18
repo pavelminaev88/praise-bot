@@ -6,7 +6,7 @@ Live bot: [@PohvalaChatBot](https://t.me/PohvalaChatBot) · Russian setup guide:
 
 - **Private chat:** text or voice (up to 10 min) → 3–4 sentences of praise.
 - **Groups:** reacts only when tagged (`@PohvalaChatBot`), replied to, or on `/praise`. Tag it in a reply to someone's message to praise that person.
-- **Memory:** your last 10 messages (and the replies) in a private chat; each is forgotten 24 h after it was written. `/forget`, `/mydata`, `/privacy`.
+- **Memory:** your last 10 messages (and the replies) in a private chat; each is forgotten 24 h after it was written; stored encrypted. `/forget`, `/mydata`, `/privacy`.
 - **Feedback:** 🔥😐👎 under each praise, counted anonymously. `/stats` for the owner.
 - **Weekly check:** every Saturday morning the bot tests itself (Telegram, storage, one real Claude reply) and sends the owner a report with weekly stats and API costs. `/selftest` runs it now.
 - **Free hosting:** Cloudflare Workers Free plan. You pay only for the AI APIs.

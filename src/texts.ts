@@ -60,15 +60,15 @@ export const T = {
   privacy: (userMessages: number, ttlHours: number) => ({
     ru: [
       userMessages
-        ? `Помню последние ${userMessages} ${plural(userMessages, "твоё сообщение", "твоих сообщения", "твоих сообщений")} и удаляю их через ${ttlHours} ${plural(ttlHours, "час", "часа", "часов")}, без привязки к аккаунту.`
+        ? `Помню последние ${userMessages} ${plural(userMessages, "твоё сообщение", "твоих сообщения", "твоих сообщений")} и удаляю их через ${ttlHours} ${plural(ttlHours, "час", "часа", "часов")}. Храню в зашифрованном виде, под хэшем номера чата.`
         : "Ничего не запоминаю.",
       "/mydata — посмотреть, /forget — стереть память.",
       "Работаю на ИИ-моделях Claude и OpenAI.",
-      `<a href="${REPO}">Открытый код бота на GitHub</a>`,
+      `<a href="${REPO}">Исходный код бота на GitHub</a>`,
     ].join("\n"),
     es: [
       userMessages
-        ? `Recuerdo tus últimos ${userMessages} mensajes y los borro a las ${ttlHours} h, sin vincularlos a tu cuenta.`
+        ? `Recuerdo tus últimos ${userMessages} mensajes y los borro a las ${ttlHours} h. Los guardo cifrados, bajo un hash del número de chat.`
         : "No guardo nada.",
       "/mydata — ver, /forget — borrar la memoria.",
       "Funciono con los modelos de IA Claude y OpenAI.",
@@ -76,7 +76,7 @@ export const T = {
     ].join("\n"),
     en: [
       userMessages
-        ? `I remember your last ${userMessages} messages and delete them after ${ttlHours} h, not linked to your account.`
+        ? `I remember your last ${userMessages} messages and delete them after ${ttlHours} h. Stored encrypted, under a hash of the chat number.`
         : "I do not remember anything.",
       "/mydata — see it, /forget — erase memory.",
       "Powered by Claude and OpenAI AI models.",

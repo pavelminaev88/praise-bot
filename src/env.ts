@@ -41,7 +41,7 @@ export function settings(env: Env) {
     maxVoiceSeconds: int(env.MAX_VOICE_SECONDS, 600),
     memoryMessages: int(env.MEMORY_MESSAGES, 20),
     memoryTtlHours: Math.max(1, int(env.MEMORY_TTL_HOURS, 24)),
-    typeOutMs: Math.max(0, int(env.TYPE_OUT_MS, 250)),
+    typeOutMs: Math.max(0, int(env.TYPE_OUT_MS, 375)),
     adminId: env.ADMIN_TELEGRAM_ID ? Number(env.ADMIN_TELEGRAM_ID) : undefined,
     telegramApi: env.TELEGRAM_API_BASE || "https://api.telegram.org",
     anthropicApi: env.ANTHROPIC_API_BASE || "https://api.anthropic.com",

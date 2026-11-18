@@ -116,6 +116,7 @@ describe("claudeCost", () => {
 });
 
 describe("memory forgets each message after the TTL", () => {
+  let lastPut: { value: string; expiration?: number } | undefined;
   function fakeKV() {
     const store = new Map<string, { value: string; metadata: unknown }>();
     return {
@@ -123,8 +124,9 @@ describe("memory forgets each message after the TTL", () => {
         const v = store.get(k);
         return { value: v ? JSON.parse(v.value) : null, metadata: v?.metadata ?? null };
       },
-      async put(k: string, value: string, o: { metadata?: unknown }) {
+      async put(k: string, value: string, o: { metadata?: unknown; expiration?: number }) {
         store.set(k, { value, metadata: o.metadata });
+        lastPut = { value, expiration: o.expiration };
       },
       async delete(k: string) {
         store.delete(k);
@@ -142,6 +144,14 @@ describe("memory forgets each message after the TTL", () => {
     ]);
     const { turns } = await mem.load(1);
     expect(turns.map((t) => t.t)).toEqual(["new", "new answer"]);
+  });
+  it("stores only ciphertext and expires when the oldest message turns 24 h old", async () => {
+    const mem = new Memory(fakeKV(), { botToken: token, maxTurns: 20, ttlHours: 24 });
+    const first = Date.now() - 10 * 3600_000;
+    await mem.append(1, [], [{ r: "u", t: "секрет", ts: first }, { r: "a", t: "ответ", ts: first }]);
+    expect(lastPut!.value).not.toContain("секрет");
+    expect(lastPut!.expiration).toBe(Math.ceil((first + 24 * 3600_000) / 1000));
+    expect((await mem.load(1)).turns.map((t) => t.t)).toEqual(["секрет", "ответ"]);
   });
 });
 
