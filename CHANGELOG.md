@@ -1,7 +1,10 @@
 # Changelog
 
+## 1.3.1 — 2026-11-18
+- Typing effect goes word by word (up to 24 steps) instead of 8 chunks. `TYPE_OUT_MS` is now the total typing time (default 2500 ms, `0` = off).
+
 ## 1.3.0 — 2026-11-18
-- Private chats: the reply is "typed out" as a live draft (Bot API `sendMessageDraft`) before the final message. `TYPE_OUT_MS` (default 375, `0` = off). Groups are unchanged: drafts are private-only.
+- Private chats: the reply is "typed out" as a live draft (Bot API `sendMessageDraft`) before the final message. `TYPE_OUT_MS`. Groups are unchanged: drafts are private-only.
 - Memory is stored encrypted (AES-GCM) in KV; old plain records are read once and rewritten encrypted.
 - Memory expires exactly `MEMORY_TTL_HOURS` after its oldest message (before: after the last one, so a message could stay up to ~2× TTL).
 - `/privacy`: "stored encrypted, under a hash of the chat number" instead of "not linked to your account"; RU link text "Исходный код" instead of "Открытый код".

@@ -43,9 +43,10 @@ function keepTyping(tg: Telegram, chatId: number): () => void {
 
 /**
  * Splits a reply into growing prefixes on word boundaries, so it can be shown "being typed".
- * Returns at most `maxSteps` prefixes; the last one is the full text.
+ * One word per step for short replies; for long ones a step adds a few words so that there are
+ * at most `maxSteps` steps (Workers Free allows 50 outgoing requests per run). Last step = full text.
  */
-export function draftSteps(text: string, maxSteps = 8): string[] {
+export function draftSteps(text: string, maxSteps = 24): string[] {
   const words = text.split(/(?<=\s)/); // keep the spaces attached to the previous word
   if (words.length <= 1 || maxSteps <= 1) return [text];
   const steps = Math.min(maxSteps, words.length);
@@ -58,15 +59,18 @@ export function draftSteps(text: string, maxSteps = 8): string[] {
 }
 
 /**
- * Private chats only: animates the reply as a live draft before the real message is sent.
- * Best effort: any error (old client, rate limit, API change) just skips the animation.
+ * Private chats only: animates the reply as a live draft, word by word, before the real message is sent.
+ * `totalMs` is roughly how long the typing takes. Best effort: any error (old client, rate limit,
+ * API change) just skips the rest of the animation.
  */
-async function typeOut(tg: Telegram, chatId: number, text: string, stepMs: number): Promise<void> {
+async function typeOut(tg: Telegram, chatId: number, text: string, totalMs: number): Promise<void> {
   const draftId = 1 + Math.floor(Math.random() * 2_000_000_000);
+  const steps = draftSteps(text);
+  const pause = Math.max(60, Math.round(totalMs / steps.length));
   try {
-    for (const part of draftSteps(text)) {
+    for (const part of steps) {
       await tg.sendDraft(chatId, draftId, part);
-      await new Promise((r) => setTimeout(r, stepMs));
+      await new Promise((r) => setTimeout(r, pause));
     }
   } catch (e) {
     console.error("draft failed:", errorName(e));

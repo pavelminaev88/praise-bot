@@ -11,7 +11,7 @@ export interface Env {
   MAX_VOICE_SECONDS?: string;
   MEMORY_MESSAGES?: string;
   MEMORY_TTL_HOURS?: string;
-  /** Pause between live-draft steps in private chats, ms. 0 turns the "typing out" effect off. */
+  /** How long the "typing out" live draft takes in private chats, ms (word by word). 0 turns it off. */
   TYPE_OUT_MS?: string;
   /** Your Telegram user ID. Enables /stats for you only. */
   ADMIN_TELEGRAM_ID?: string;
@@ -41,7 +41,7 @@ export function settings(env: Env) {
     maxVoiceSeconds: int(env.MAX_VOICE_SECONDS, 600),
     memoryMessages: int(env.MEMORY_MESSAGES, 20),
     memoryTtlHours: Math.max(1, int(env.MEMORY_TTL_HOURS, 24)),
-    typeOutMs: Math.max(0, int(env.TYPE_OUT_MS, 375)),
+    typeOutMs: Math.max(0, int(env.TYPE_OUT_MS, 2500)),
     adminId: env.ADMIN_TELEGRAM_ID ? Number(env.ADMIN_TELEGRAM_ID) : undefined,
     telegramApi: env.TELEGRAM_API_BASE || "https://api.telegram.org",
     anthropicApi: env.ANTHROPIC_API_BASE || "https://api.anthropic.com",

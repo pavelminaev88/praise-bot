@@ -171,9 +171,15 @@ describe("draftSteps", () => {
   it("grows on word boundaries and ends with the full text", () => {
     const text = "Маша, слышу, что этот звонок давался непросто. Но ты всё-таки позвонила.";
     const steps = draftSteps(text);
-    expect(steps.length).toBeLessThanOrEqual(8);
+    expect(steps.length).toBe(text.split(" ").length); // short reply: one word per step
     expect(steps[steps.length - 1]).toBe(text);
     for (let i = 1; i < steps.length; i++) expect(steps[i].startsWith(steps[i - 1])).toBe(true);
+  });
+  it("caps the number of steps for long replies", () => {
+    const long = Array.from({ length: 70 }, (_, i) => `слово${i}`).join(" ");
+    const steps = draftSteps(long);
+    expect(steps.length).toBe(24);
+    expect(steps[23]).toBe(long);
   });
   it("returns a single step for one word", () => {
     expect(draftSteps("Готово.")).toEqual(["Готово."]);
