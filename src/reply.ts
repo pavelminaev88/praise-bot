@@ -104,7 +104,7 @@ export async function handleReply(env: Env, job: ReplyJob): Promise<void> {
     }
 
     // 2. Memory (private chats only).
-    const memory = new Memory(env.KV, { botToken: env.TELEGRAM_BOT_TOKEN, maxTurns: s.memoryMessages, ttlHours: s.memoryTtlHours });
+    const memory = new Memory(env.KV, { botToken: env.TELEGRAM_BOT_TOKEN, memoryKey: env.MEMORY_KEY, maxTurns: s.memoryMessages, ttlHours: s.memoryTtlHours });
     const useMemory = job.chatKind === "private" && memory.enabled;
     const history: Turn[] = useMemory ? (await memory.load(job.chatId)).turns : [];
     const previousMode = [...history].reverse().find((t) => t.r === "a")?.m;

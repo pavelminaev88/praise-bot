@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.4.0 — 2026-11-18
+- Optional secret `MEMORY_KEY`: memory records are named (HMAC) and encrypted with it instead of keys derived from the bot token. Existing records are picked up and moved on the next message. `/selftest` shows which key is in use.
+
 ## 1.3.1 — 2026-11-18
 - Typing effect goes word by word (up to 24 steps) instead of 8 chunks. `TYPE_OUT_MS` is now the total typing time (default 2500 ms, `0` = off).
 

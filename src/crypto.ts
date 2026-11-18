@@ -1,4 +1,4 @@
-// Small crypto helpers. All keys are derived from the bot token, so there is nothing extra to configure.
+// Small crypto helpers. Keys are derived from the bot token, except memory, which uses MEMORY_KEY when it is set.
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -29,6 +29,13 @@ export async function webhookSecret(botToken: string): Promise<string> {
 /** Stable, non-reversible key for a chat (used as the memory key instead of the raw chat ID). */
 export async function chatKey(botToken: string, chatId: number): Promise<string> {
   return hex(await sha256(`chat:${botToken}:${chatId}`)).slice(0, 32);
+}
+
+/** HMAC-SHA256 name for a chat's memory record under a dedicated memory secret (MEMORY_KEY). */
+export async function memoryRecordName(memorySecret: string, chatId: number): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", enc.encode(memorySecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`chat:${chatId}`));
+  return hex(new Uint8Array(sig)).slice(0, 32);
 }
 
 /** Hash of a user ID with a salt that is thrown away after a day. Good for counting, not for tracking. */

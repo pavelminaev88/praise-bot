@@ -47,6 +47,7 @@ For personal and non-commercial use — see [License](#license).
 | `MAX_VOICE_SECONDS` | `600` | longer voice messages are politely refused |
 | `MEMORY_MESSAGES` | `20` | `0` turns memory off |
 | `MEMORY_TTL_HOURS` | `24` | |
+| `MEMORY_KEY` (secret) | — | Recommended. Separate key for encrypting memory; without it the key comes from the bot token |
 
 To change how the bot talks, edit [`src/prompt.ts`](src/prompt.ts).
 

@@ -4,6 +4,8 @@ export interface Env {
   ANTHROPIC_API_KEY: string;
   /** Optional. Without it the bot answers text only. */
   OPENAI_API_KEY?: string;
+  /** Optional, recommended. Separate secret for encrypting memory (any long random string). Without it memory keys come from the bot token. */
+  MEMORY_KEY?: string;
 
   // Settings (plain variables)
   MODEL?: string;

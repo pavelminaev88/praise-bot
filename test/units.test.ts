@@ -153,6 +153,19 @@ describe("memory forgets each message after the TTL", () => {
     expect(lastPut!.expiration).toBe(Math.ceil((first + 24 * 3600_000) / 1000));
     expect((await mem.load(1)).turns.map((t) => t.t)).toEqual(["секрет", "ответ"]);
   });
+  it("moves a record to MEMORY_KEY: reads the old one, writes the new one, deletes the old", async () => {
+    const kv = fakeKV();
+    const before = new Memory(kv, { botToken: token, maxTurns: 20, ttlHours: 24 });
+    await before.append(7, [], [{ r: "u", t: "раньше" }, { r: "a", t: "ок" }]);
+    const after = new Memory(kv, { botToken: token, memoryKey: "separate-memory-secret", maxTurns: 20, ttlHours: 24 });
+    const { turns } = await after.load(7);
+    expect(turns.map((t) => t.t)).toEqual(["раньше", "ок"]);
+    await after.append(7, turns, [{ r: "u", t: "теперь" }, { r: "a", t: "да" }]);
+    expect((await before.load(7)).turns).toEqual([]); // old record is gone
+    expect((await after.load(7)).turns.map((t) => t.t)).toEqual(["раньше", "ок", "теперь", "да"]);
+    await after.forget(7);
+    expect((await after.load(7)).turns).toEqual([]);
+  });
 });
 
 describe("group diagnostics", () => {

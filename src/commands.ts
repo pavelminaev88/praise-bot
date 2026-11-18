@@ -17,7 +17,7 @@ export async function runCommand(env: Env, a: CommandAction): Promise<void> {
   const s = settings(env);
   const tg = new Telegram(env.TELEGRAM_BOT_TOKEN, s.telegramApi);
   const lang = pickLang(a.userLang);
-  const memory = new Memory(env.KV, { botToken: env.TELEGRAM_BOT_TOKEN, maxTurns: s.memoryMessages, ttlHours: s.memoryTtlHours });
+  const memory = new Memory(env.KV, { botToken: env.TELEGRAM_BOT_TOKEN, memoryKey: env.MEMORY_KEY, maxTurns: s.memoryMessages, ttlHours: s.memoryTtlHours });
   const reply = (text: string, html = false) => tg.sendMessage(a.chatId, text, { replyTo: a.replyTo, html });
 
   switch (a.command) {

@@ -1,6 +1,6 @@
 {
   "name": "praise-bot",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "private": true,
   "description": "Telegram bot that gives short, sincere praise. Runs on Cloudflare Workers.",
   "license": "PolyForm-Noncommercial-1.0.0",

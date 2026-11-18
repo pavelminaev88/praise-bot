@@ -63,7 +63,8 @@ async function checkStorage(env: Env): Promise<Check> {
   await env.KV.delete(key);
   const row = await env.DB.prepare("SELECT 1 AS one").first<{ one: number }>();
   const ok = kvOk && row?.one === 1;
-  return { ok, text: ok ? "Память и статистика: работают" : `Память: ${kvOk ? "ок" : "сбой"}, статистика: ${row?.one === 1 ? "ок" : "сбой"}` };
+  const keyNote = env.MEMORY_KEY ? "память шифруется отдельным ключом" : "память шифруется ключом из токена (MEMORY_KEY не задан)";
+  return { ok, text: ok ? `Память и статистика: работают, ${keyNote}` : `Память: ${kvOk ? "ок" : "сбой"}, статистика: ${row?.one === 1 ? "ок" : "сбой"}` };
 }
 
 /** Returns the check and the test answer, so the owner can see it is sensible. */
