@@ -41,6 +41,38 @@ function keepTyping(tg: Telegram, chatId: number): () => void {
   };
 }
 
+/**
+ * Splits a reply into growing prefixes on word boundaries, so it can be shown "being typed".
+ * Returns at most `maxSteps` prefixes; the last one is the full text.
+ */
+export function draftSteps(text: string, maxSteps = 8): string[] {
+  const words = text.split(/(?<=\s)/); // keep the spaces attached to the previous word
+  if (words.length <= 1 || maxSteps <= 1) return [text];
+  const steps = Math.min(maxSteps, words.length);
+  const out: string[] = [];
+  for (let i = 1; i <= steps; i++) {
+    const n = Math.round((words.length * i) / steps);
+    out.push(words.slice(0, n).join("").trimEnd());
+  }
+  return out.filter((v, i, a) => v && v !== a[i - 1]);
+}
+
+/**
+ * Private chats only: animates the reply as a live draft before the real message is sent.
+ * Best effort: any error (old client, rate limit, API change) just skips the animation.
+ */
+async function typeOut(tg: Telegram, chatId: number, text: string, stepMs: number): Promise<void> {
+  const draftId = 1 + Math.floor(Math.random() * 2_000_000_000);
+  try {
+    for (const part of draftSteps(text)) {
+      await tg.sendDraft(chatId, draftId, part);
+      await new Promise((r) => setTimeout(r, stepMs));
+    }
+  } catch (e) {
+    console.error("draft failed:", errorName(e));
+  }
+}
+
 export async function handleReply(env: Env, job: ReplyJob): Promise<void> {
   const s = settings(env);
   const tg = new Telegram(env.TELEGRAM_BOT_TOKEN, s.telegramApi);
@@ -86,6 +118,7 @@ export async function handleReply(env: Env, job: ReplyJob): Promise<void> {
     const eventId = randomId();
     const withButtons = job.chatKind === "private" && answer.mode === "PRAISE";
     stopTyping();
+    if (job.chatKind === "private" && s.typeOutMs > 0) await typeOut(tg, job.chatId, answer.answer, s.typeOutMs);
     await tg.sendMessage(job.chatId, answer.answer, {
       replyTo: job.chatKind === "group" ? job.replyTo : undefined,
       keyboard: withButtons ? keyboard(eventId) : undefined,

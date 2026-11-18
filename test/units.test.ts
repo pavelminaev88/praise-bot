@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { chatKey, open, seal, webhookSecret } from "../src/crypto";
 import { buildUserContent, parseAnswer } from "../src/llm";
 import { trimTurns } from "../src/memory";
-import { errorName, UserFacingError } from "../src/reply";
+import { draftSteps, errorName, UserFacingError } from "../src/reply";
 import type { ReplyJob } from "../src/routing";
 import { pickLang, plural, T } from "../src/texts";
 import { addressedVia } from "../src/diag";
@@ -154,5 +154,18 @@ describe("group diagnostics", () => {
     expect(addressedVia({ ...base, text: "/praise", entities: [{ type: "bot_command", offset: 0, length: 7 }] }, bot)).toBe("команда");
     expect(addressedVia({ ...base, text: "спасибо", reply_to_message: { ...base, from: { id: 999, is_bot: true, first_name: "Похвала" } } }, bot)).toBe("ответ боту");
     expect(addressedVia({ ...base, text: "обычный разговор" }, bot)).toBeUndefined();
+  });
+});
+
+describe("draftSteps", () => {
+  it("grows on word boundaries and ends with the full text", () => {
+    const text = "Маша, слышу, что этот звонок давался непросто. Но ты всё-таки позвонила.";
+    const steps = draftSteps(text);
+    expect(steps.length).toBeLessThanOrEqual(8);
+    expect(steps[steps.length - 1]).toBe(text);
+    for (let i = 1; i < steps.length; i++) expect(steps[i].startsWith(steps[i - 1])).toBe(true);
+  });
+  it("returns a single step for one word", () => {
+    expect(draftSteps("Готово.")).toEqual(["Готово."]);
   });
 });

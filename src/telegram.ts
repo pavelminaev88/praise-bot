@@ -103,6 +103,14 @@ export class Telegram {
     return this.call<TgMessage>("sendMessage", params);
   }
 
+  /**
+   * Shows a live, animated draft of a message in a private chat (Bot API sendMessageDraft).
+   * The draft is a temporary preview: the final text must still be sent with sendMessage.
+   */
+  sendDraft(chatId: number, draftId: number, text: string) {
+    return this.call("sendMessageDraft", { chat_id: chatId, draft_id: draftId, text });
+  }
+
   sendTyping(chatId: number) {
     return this.call("sendChatAction", { chat_id: chatId, action: "typing" });
   }
